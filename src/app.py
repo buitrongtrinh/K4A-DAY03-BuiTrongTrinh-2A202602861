@@ -74,8 +74,6 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
     conversation_prompt = user_query
     
     while step < MAX_ITERATIONS:
-        if step > 0:
-            time.sleep(80)  # hoặc 30
         step += 1
         step_start_time = time.time()
         print(f"\n--- 🔄 Vòng lặp ReAct Loop (Step {step}/{MAX_ITERATIONS}) ---")
