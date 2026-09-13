@@ -3,27 +3,143 @@
     "step": 1,
     "query": "Chào bạn, bạn có thể giới thiệu quy chế học vụ cơ bản của Đại học VinUni không?",
     "action_type": "FINAL_ANSWER",
-    "thought": "Câu hỏi chung về quy chế học vụ, trả lời trực tiếp không cần gọi Tool.",
-    "output": "[Mock Agent Response]: Xin chào! Quy chế học vụ VinUni yêu cầu sinh viên tích lũy tối thiểu 120 tín chỉ và duy trì GPA trên 2.0 để tốt nghiệp.",
-    "latency_ms": 2845.93
+    "thought": "Gemini phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
+    "output": "Chào bạn! Rất vui được hỗ trợ bạn.\n\nQuy chế học vụ tại Đại học VinUni được thiết kế nhằm đảm bảo tiêu chuẩn quốc tế và thúc đẩy sự phát triển toàn diện của sinh viên. Dưới đây là những điểm cơ bản nhất mà bạn cần nắm rõ:\n\n### 1. Hệ thống tín chỉ và Đánh giá kết quả\n*   **Hệ thống tín chỉ:** VinUni áp dụng hệ thống tín chỉ tương đương với các đại học hàng đầu thế giới. Mỗi môn học có số tín chỉ nhất định, phản ánh khối lượng công việc học tập.\n*   **Thang điểm:** Kết quả học tập thường được đánh giá theo thang điểm chữ (A, A-, B+, B, B-, C+, C, D, F) và quy đổi sang điểm trung bình tích lũy (GPA) trên thang điểm 4.0.\n\n### 2. Yêu cầu về học thuật\n*   **GPA tối thiểu:** Sinh viên cần duy trì mức GPA tối thiểu (thường là 2.0/4.0) để đảm bảo tình trạng học tập tốt (Good Standing). Nếu GPA rơi xuống dưới mức này, sinh viên có thể bị đặt vào tình trạng cảnh báo học vụ (Academic Probation).\n*   **Tiến độ học tập:** Sinh viên cần hoàn thành đủ số tín chỉ theo lộ trình của chương trình đào tạo để đảm bảo tốt nghiệp đúng hạn.\n\n### 3. Liêm chính học thuật (Academic Integrity)\nĐây là giá trị cốt lõi tại VinUni. Mọi hành vi gian lận trong thi cử, đạo văn (plagiarism), hoặc không trung thực trong học tập đều bị xử lý rất nghiêm khắc theo quy định của nhà trường.\n\n### 4. Vai trò của Cố vấn học tập (Academic Advisor)\nMỗi sinh viên sẽ được phân công một Cố vấn học tập. Đây là người đồng hành, hỗ trợ bạn trong việc:\n*   Lên kế hoạch học tập và chọn môn học.\n*   Giải đáp các thắc mắc về quy chế, thủ tục hành chính.\n*   Định hướng phát triển cá nhân và nghề nghiệp.\n\n### 5. Quy định về điểm danh và tham gia lớp học\nViệc tham gia đầy đủ các buổi học là bắt buộc. Tỷ lệ chuyên cần có thể ảnh hưởng trực tiếp đến kết quả đánh giá cuối cùng của môn học.\n\n---\n**Lưu ý:** Các quy định chi tiết có thể thay đổi tùy theo từng năm học và từng ngành đào tạo. Để có thông tin chính xác và cập nhật nhất cho trường hợp cụ thể của bạn, bạn nên:\n1.  Tham khảo **Sổ tay sinh viên (Student Handbook)** trên cổng thông tin nội bộ của VinUni.\n2.  Liên hệ trực tiếp với **Phòng Đào tạo (Registrar's Office)**.\n3.  Đặt lịch hẹn với **Cố vấn học tập** của bạn thông qua tôi nếu bạn cần tư vấn chuyên sâu.\n\nNếu bạn cần tra cứu thông tin cụ thể về hồ sơ học vụ hoặc lịch thi của cá nhân, hãy cung cấp mã sinh viên, tôi sẽ hỗ trợ bạn ngay!",
+    "latency_ms": 3578.07
   },
   {
     "step": 1,
     "query": "Hãy tra cứu thông tin học vụ của sinh viên SV2026001.",
     "action_type": "TOOL_EXECUTION",
+    "thought": "Gemini quyết định gọi công cụ 'academic_query' với tham số: {\"student_id\": \"SV2026001\"}",
     "tool_name": "academic_query",
     "arguments": {
       "student_id": "SV2026001"
     },
-    "observation": {},
-    "latency_ms": 799.12
+    "observation": {
+      "status": "SUCCESS",
+      "student_id": "SV2026001",
+      "data": {
+        "full_name": "Nguyễn Văn An",
+        "class": "AI-K4",
+        "gpa": 3.85,
+        "email": "an.nv@vinuni.edu.vn",
+        "status": "Đang học",
+        "advisor": "PGS.TS Nguyễn Văn A"
+      }
+    },
+    "latency_ms": 1537.03
   },
   {
     "step": 2,
     "query": "Hãy tra cứu thông tin học vụ của sinh viên SV2026001.",
     "action_type": "FINAL_ANSWER",
-    "thought": "Tổng hợp kết quả từ MCP Server thành công.",
-    "output": "Chưa thể trả lời chi tiết do chưa nhận được dữ liệu từ MCP Server (hãy hoàn thành TODO 2.1).",
-    "latency_ms": 10.0
+    "thought": "Gemini phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
+    "output": "Thông tin học vụ của sinh viên Nguyễn Văn An (Mã SV: SV2026001) như sau:\n\n*   **Họ và tên:** Nguyễn Văn An\n*   **Lớp:** AI-K4\n*   **GPA:** 3.85\n*   **Email:** an.nv@vinuni.edu.vn\n*   **Trạng thái:** Đang học\n*   **Cố vấn học tập:** PGS.TS Nguyễn Văn A\n\nBạn có cần hỗ trợ thêm về việc đặt lịch hẹn tư vấn với cố vấn học tập hay tra cứu lịch thi không?",
+    "latency_ms": 1314.02
+  },
+  {
+    "step": 1,
+    "query": "Hãy đặt lịch tư vấn học vụ cho sinh viên SV2026001 với PGS.TS Nguyễn Văn A vào lúc 14:00 ngày 15/09/2026.",
+    "action_type": "TOOL_EXECUTION",
+    "thought": "Gemini quyết định gọi công cụ 'schedule_appointment' với tham số: {\"datetime_str\": \"14:00 15/09/2026\", \"advisor_name\": \"PGS.TS Nguyễn Văn A\", \"student_id\": \"SV2026001\"}",
+    "tool_name": "schedule_appointment",
+    "arguments": {
+      "datetime_str": "14:00 15/09/2026",
+      "advisor_name": "PGS.TS Nguyễn Văn A",
+      "student_id": "SV2026001"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "booking_id": "BK-SV2026001-99",
+      "student_id": "SV2026001",
+      "datetime": "14:00 15/09/2026",
+      "advisor": "PGS.TS Nguyễn Văn A",
+      "message": "Đặt lịch thành công cho sinh viên SV2026001 với PGS.TS Nguyễn Văn A vào lúc 14:00 15/09/2026."
+    },
+    "latency_ms": 1024.13
+  },
+  {
+    "step": 2,
+    "query": "Hãy đặt lịch tư vấn học vụ cho sinh viên SV2026001 với PGS.TS Nguyễn Văn A vào lúc 14:00 ngày 15/09/2026.",
+    "action_type": "FINAL_ANSWER",
+    "thought": "Gemini phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
+    "output": "Đặt lịch tư vấn học vụ của bạn đã thành công. Dưới đây là thông tin chi tiết:\n\n*   **Mã sinh viên:** SV2026001\n*   **Cố vấn học tập:** PGS.TS Nguyễn Văn A\n*   **Thời gian:** 14:00 ngày 15/09/2026\n*   **Mã đặt lịch (Booking ID):** BK-SV2026001-99\n\nChúc bạn có buổi tư vấn hiệu quả!",
+    "latency_ms": 1297.67
+  },
+  {
+    "step": 1,
+    "query": "Hãy tra cứu thông tin học vụ của sinh viên SV2026001 để xác định cố vấn học tập, sau đó đặt lịch tư vấn với đúng cố vấn đó vào lúc 09:00 ngày 16/09/2026.",
+    "action_type": "TOOL_EXECUTION",
+    "thought": "Gemini quyết định gọi công cụ 'academic_query' với tham số: {\"student_id\": \"SV2026001\"}",
+    "tool_name": "academic_query",
+    "arguments": {
+      "student_id": "SV2026001"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "student_id": "SV2026001",
+      "data": {
+        "full_name": "Nguyễn Văn An",
+        "class": "AI-K4",
+        "gpa": 3.85,
+        "email": "an.nv@vinuni.edu.vn",
+        "status": "Đang học",
+        "advisor": "PGS.TS Nguyễn Văn A"
+      }
+    },
+    "latency_ms": 1153.11
+  },
+  {
+    "step": 2,
+    "query": "Hãy tra cứu thông tin học vụ của sinh viên SV2026001 để xác định cố vấn học tập, sau đó đặt lịch tư vấn với đúng cố vấn đó vào lúc 09:00 ngày 16/09/2026.",
+    "action_type": "TOOL_EXECUTION",
+    "thought": "Gemini quyết định gọi công cụ 'schedule_appointment' với tham số: {\"datetime_str\": \"09:00 16/09/2026\", \"advisor_name\": \"PGS.TS Nguyễn Văn A\", \"student_id\": \"SV2026001\"}",
+    "tool_name": "schedule_appointment",
+    "arguments": {
+      "datetime_str": "09:00 16/09/2026",
+      "advisor_name": "PGS.TS Nguyễn Văn A",
+      "student_id": "SV2026001"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "booking_id": "BK-SV2026001-99",
+      "student_id": "SV2026001",
+      "datetime": "09:00 16/09/2026",
+      "advisor": "PGS.TS Nguyễn Văn A",
+      "message": "Đặt lịch thành công cho sinh viên SV2026001 với PGS.TS Nguyễn Văn A vào lúc 09:00 16/09/2026."
+    },
+    "latency_ms": 1179.08
+  },
+  {
+    "step": 3,
+    "query": "Hãy tra cứu thông tin học vụ của sinh viên SV2026001 để xác định cố vấn học tập, sau đó đặt lịch tư vấn với đúng cố vấn đó vào lúc 09:00 ngày 16/09/2026.",
+    "action_type": "FINAL_ANSWER",
+    "thought": "Gemini phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
+    "output": "Thông tin học vụ của sinh viên SV2026001 đã được xác định và lịch tư vấn đã được đặt thành công. Dưới đây là chi tiết:\n\n*   **Cố vấn học tập:** PGS.TS Nguyễn Văn A\n*   **Thời gian hẹn:** 09:00 ngày 16/09/2026\n*   **Trạng thái:** Đặt lịch thành công\n*   **Mã đặt lịch (Booking ID):** BK-SV2026001-99\n\nBạn vui lòng ghi nhớ thời gian và thông tin cố vấn để tham gia buổi tư vấn đúng hẹn.",
+    "latency_ms": 1613.11
+  },
+  {
+    "step": 1,
+    "query": "Hãy tra cứu điểm GPA và lịch thi của sinh viên có mã SV9999999.",
+    "action_type": "TOOL_EXECUTION",
+    "thought": "Gemini quyết định gọi công cụ 'academic_query' với tham số: {\"student_id\": \"SV9999999\"}",
+    "tool_name": "academic_query",
+    "arguments": {
+      "student_id": "SV9999999"
+    },
+    "observation": {
+      "status": "NOT_FOUND",
+      "message": "Không tìm thấy dữ liệu sinh viên có mã 'SV9999999'"
+    },
+    "latency_ms": 1127.37
+  },
+  {
+    "step": 2,
+    "query": "Hãy tra cứu điểm GPA và lịch thi của sinh viên có mã SV9999999.",
+    "action_type": "FINAL_ANSWER",
+    "thought": "Observation trả về NOT_FOUND; dừng để không gọi tool lặp lại hoặc bịa dữ liệu.",
+    "output": "Không tìm thấy dữ liệu sinh viên có mã 'SV9999999'",
+    "latency_ms": 0.0
   }
 ]

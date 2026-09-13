@@ -6,6 +6,7 @@ Hỗ trợ Native Tool Calling và chuyển đổi linh hoạt qua biến môi t
 import os
 import sys
 import json
+import re
 from typing import Dict, Any, List
 from dotenv import load_dotenv
 
@@ -36,28 +37,100 @@ class MockOfflineProvider(BaseLLMProvider):
 
     def generate_with_tools(self, prompt: str, tools_schema: List[Dict[str, Any]], system_prompt: str = "") -> Dict[str, Any]:
         prompt_lower = prompt.lower()
-        
-        # Mô phỏng nhận diện intent gọi Tool
-        if "sv2026001" in prompt_lower and "đặt lịch" in prompt_lower:
+
+        student_id_match = re.search(r"\bSV\d+\b", prompt, re.IGNORECASE)
+        student_id = student_id_match.group(0).upper() if student_id_match else "SV2026001"
+        time_match = re.search(r"(\d{1,2}:\d{2})\s*(?:ngày\s*)?(\d{1,2}/\d{1,2}/\d{4})", prompt, re.IGNORECASE)
+        datetime_str = (
+            f"{time_match.group(1)} {time_match.group(2)}"
+            if time_match else "14:00 15/09/2026"
+        )
+
+        # Khi đã có Observation, mô phỏng lượt suy luận tiếp theo trong ReAct loop.
+        if "[observation từ mcp server]" in prompt_lower:
+            if '"status": "NOT_FOUND"' in prompt:
+                return {
+                    "type": "text",
+                    "content": f"Không tìm thấy dữ liệu sinh viên có mã {student_id}. Vui lòng kiểm tra lại mã sinh viên.",
+                    "thought": "Observation trả về NOT_FOUND nên không được bịa đặt dữ liệu."
+                }
+            if "tool vừa gọi: academic_query" in prompt_lower and "đặt lịch" in prompt_lower:
+                return {
+                    "type": "tool_call",
+                    "tool_name": "schedule_appointment",
+                    "arguments": {
+                        "student_id": student_id,
+                        "datetime_str": datetime_str,
+                        "advisor_name": "PGS.TS Nguyễn Văn A"
+                    },
+                    "thought": "Đã có thông tin cố vấn từ bước tra cứu, tiếp tục đặt lịch theo yêu cầu."
+                }
+            if "tool vừa gọi: academic_query" in prompt_lower and "lịch thi" in prompt_lower:
+                return {
+                    "type": "tool_call",
+                    "tool_name": "exam_schedule_query",
+                    "arguments": {"student_id": student_id},
+                    "thought": "Đã có hồ sơ học vụ; tiếp tục tra cứu lịch thi để trả lời đầy đủ."
+                }
+            if "tool vừa gọi: schedule_appointment" in prompt_lower:
+                return {
+                    "type": "text",
+                    "content": f"Đã đặt lịch tư vấn cho {student_id} vào {datetime_str} với PGS.TS Nguyễn Văn A.",
+                    "thought": "Observation xác nhận lịch hẹn đã được tạo thành công."
+                }
+            if "tool vừa gọi: exam_schedule_query" in prompt_lower:
+                return {
+                    "type": "text",
+                    "content": f"Đã tra cứu lịch thi cho sinh viên {student_id}; vui lòng xem các môn thi trong kết quả từ MCP Server.",
+                    "thought": "Observation đã cung cấp lịch thi, có thể tổng hợp câu trả lời."
+                }
             return {
-                "type": "tool_call",
-                "tool_name": "schedule_appointment",
-                "arguments": {"student_id": "SV2026001", "datetime_str": "14:00 15/09/2026", "advisor_name": "PGS.TS Nguyễn Văn A"},
-                "thought": "Người dùng yêu cầu đặt lịch hẹn tư vấn cho sinh viên SV2026001. Tôi sẽ gọi tool schedule_appointment."
+                "type": "text",
+                "content": f"Đã tra cứu thành công thông tin học vụ của sinh viên {student_id}.",
+                "thought": "Observation đã có đủ dữ liệu để trả lời."
             }
-        elif "sv2026001" in prompt_lower or "tra cứu" in prompt_lower:
+
+        # Mô phỏng nhận diện intent gọi Tool ở lượt đầu tiên.
+        if "tra cứu" in prompt_lower and "đặt lịch" in prompt_lower:
             return {
                 "type": "tool_call",
                 "tool_name": "academic_query",
-                "arguments": {"student_id": "SV2026001"},
-                "thought": "Người dùng muốn tra cứu thông tin học vụ của sinh viên SV2026001. Tôi sẽ gọi tool academic_query."
+                "arguments": {"student_id": student_id},
+                "thought": "Cần tra cứu thông tin và cố vấn học tập trước khi đặt lịch."
             }
-        else:
+        if "gpa" in prompt_lower and "lịch thi" in prompt_lower:
             return {
-                "type": "text",
-                "content": f"[Mock Agent Response]: Xin chào! Quy chế học vụ VinUni yêu cầu sinh viên tích lũy tối thiểu 120 tín chỉ và duy trì GPA trên 2.0 để tốt nghiệp.",
-                "thought": "Câu hỏi chung về quy chế học vụ, trả lời trực tiếp không cần gọi Tool."
+                "type": "tool_call",
+                "tool_name": "academic_query",
+                "arguments": {"student_id": student_id},
+                "thought": "Cần tra cứu hồ sơ học vụ trước, sau đó tiếp tục lấy lịch thi."
             }
+        if "đặt lịch" in prompt_lower:
+            return {
+                "type": "tool_call",
+                "tool_name": "schedule_appointment",
+                "arguments": {"student_id": student_id, "datetime_str": datetime_str, "advisor_name": "PGS.TS Nguyễn Văn A"},
+                "thought": f"Người dùng yêu cầu đặt lịch hẹn tư vấn cho sinh viên {student_id}. Tôi sẽ gọi tool schedule_appointment."
+            }
+        if "lịch thi" in prompt_lower:
+            return {
+                "type": "tool_call",
+                "tool_name": "exam_schedule_query",
+                "arguments": {"student_id": student_id},
+                "thought": f"Người dùng muốn tra cứu lịch thi của sinh viên {student_id}. Tôi sẽ gọi tool exam_schedule_query."
+            }
+        if student_id_match or "tra cứu" in prompt_lower:
+            return {
+                "type": "tool_call",
+                "tool_name": "academic_query",
+                "arguments": {"student_id": student_id},
+                "thought": f"Người dùng muốn tra cứu thông tin học vụ của sinh viên {student_id}. Tôi sẽ gọi tool academic_query."
+            }
+        return {
+            "type": "text",
+            "content": "[Mock Agent Response]: Xin chào! Quy chế học vụ VinUni yêu cầu sinh viên tích lũy tối thiểu 120 tín chỉ và duy trì GPA trên 2.0 để tốt nghiệp.",
+            "thought": "Câu hỏi chung về quy chế học vụ, trả lời trực tiếp không cần gọi Tool."
+        }
 
 
 class GeminiProvider(BaseLLMProvider):

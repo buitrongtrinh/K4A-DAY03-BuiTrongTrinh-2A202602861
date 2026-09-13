@@ -71,14 +71,21 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
     step = 0
     trace_logs = []
     tools_list = mcp_server.list_tools()
+    conversation_prompt = user_query
     
     while step < MAX_ITERATIONS:
+        if step > 0:
+            time.sleep(80)  # hoặc 30
         step += 1
         step_start_time = time.time()
         print(f"\n--- 🔄 Vòng lặp ReAct Loop (Step {step}/{MAX_ITERATIONS}) ---")
         
         # Gọi LLM với Native Tool Calling Specs
-        llm_response = provider.generate_with_tools(user_query, tools_list, system_prompt=REACT_AGENT_SYSTEM_PROMPT)
+        llm_response = provider.generate_with_tools(
+            conversation_prompt,
+            tools_list,
+            system_prompt=REACT_AGENT_SYSTEM_PROMPT
+        )
         latency_ms = round((time.time() - step_start_time) * 1000, 2)
         
         thought = llm_response.get("thought", "Đang suy luận...")
@@ -105,59 +112,72 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
             
             print(f"🛠️ [Action Proposed]: {tool_name}({arguments})")
             
-            # Thực thi Tool qua MCP Server
+            # Thực thi Tool qua MCP Server và đưa Observation vào lượt suy luận sau.
             mcp_result = mcp_server.call_tool(tool_name, arguments)
             obs_data = mcp_result.get("result", {})
-            
-            if not obs_data:
-                print(f"👁️ [Observation từ MCP Server]: {{}}")
-                print(f"⚠️ [CHÚ Ý]: MCP Server trả về kết quả rỗng! Học viên cần hoàn thành TODO 2.1 trong 'src/mcp_server.py'.")
-                final_answer = "Chưa thể trả lời chi tiết do chưa nhận được dữ liệu từ MCP Server (hãy hoàn thành TODO 2.1)."
-            else:
-                obs_str = json.dumps(obs_data, ensure_ascii=False)
-                print(f"👁️ [Observation từ MCP Server]: {obs_str}")
-                
-                # Tổng hợp Final Answer từ kết quả Observation thực tế
-                if obs_data.get("status") == "SUCCESS":
-                    if "data" in obs_data:
-                        d = obs_data["data"]
-                        final_answer = (
-                            f"Kết quả tra cứu cho sinh viên {obs_data.get('student_id', '')} ({d.get('full_name', '')}): "
-                            f"Lớp {d.get('class', '')}, GPA: {d.get('gpa', '')}, Email: {d.get('email', '')}, "
-                            f"Trạng thái: {d.get('status', '')}, Cố vấn: {d.get('advisor', '')}."
-                        )
-                    elif "message" in obs_data:
-                        final_answer = obs_data["message"]
-                    else:
-                        final_answer = f"Đã hoàn tất xử lý qua MCP Server: {json.dumps(obs_data, ensure_ascii=False)}"
-                elif obs_data.get("status") == "NOT_FOUND":
-                    final_answer = obs_data.get("message", "Không tìm thấy thông tin sinh viên yêu cầu.")
-                else:
-                    final_answer = f"Phản hồi từ công cụ: {json.dumps(obs_data, ensure_ascii=False)}"
+            obs_str = json.dumps(obs_data, ensure_ascii=False)
+            print(f"👁️ [Observation từ MCP Server]: {obs_str}")
             
             trace_logs.append({
                 "step": step,
                 "query": user_query,
                 "action_type": "TOOL_EXECUTION",
+                "thought": thought,
                 "tool_name": tool_name,
                 "arguments": arguments,
                 "observation": obs_data,
                 "latency_ms": latency_ms
             })
-            
-            # Kết thúc vòng lặp sau khi hoàn tất Observation và xuất Final Answer
-            print(f"🧠 [Thought]: Đã nhận được dữ liệu từ MCP Server. Tổng hợp kết quả phản hồi.")
-            print(f"🏁 [Final Answer]: {final_answer}")
-            
+
+            if obs_data.get("status") == "NOT_FOUND":
+                final_answer = obs_data.get(
+                    "message",
+                    "Không tìm thấy thông tin theo yêu cầu."
+                )
+                print(f"🏁 [Final Answer]: {final_answer}")
+                trace_logs.append({
+                    "step": step + 1,
+                    "query": user_query,
+                    "action_type": "FINAL_ANSWER",
+                    "thought": "Observation trả về NOT_FOUND; dừng để không gọi tool lặp lại hoặc bịa dữ liệu.",
+                    "output": final_answer,
+                    "latency_ms": 0.0
+                })
+                break
+
+            conversation_prompt = (
+                f"{user_query}\n\n"
+                "[Observation từ MCP Server]\n"
+                f"Tool vừa gọi: {tool_name}\n"
+                f"Arguments: {json.dumps(arguments, ensure_ascii=False)}\n"
+                f"Result: {obs_str}\n\n"
+                "Dựa hoàn toàn trên Observation trên, hãy tiếp tục gọi tool nếu còn thiếu dữ liệu "
+                "hoặc trả lời cuối cùng cho người dùng."
+            )
+
+        else:
+            error_message = "LLM trả về phản hồi không hợp lệ; không thể tiếp tục ReAct loop."
+            print(f"⚠️ [AGENT ERROR]: {error_message}")
             trace_logs.append({
-                "step": step + 1,
+                "step": step,
                 "query": user_query,
-                "action_type": "FINAL_ANSWER",
-                "thought": "Tổng hợp kết quả từ MCP Server thành công.",
-                "output": final_answer,
-                "latency_ms": 10.0
+                "action_type": "ERROR",
+                "output": error_message,
+                "latency_ms": latency_ms
             })
             break
+
+    if step >= MAX_ITERATIONS and (not trace_logs or trace_logs[-1].get("action_type") != "FINAL_ANSWER"):
+        final_answer = "Agent đã đạt số vòng lặp tối đa trước khi hoàn thành yêu cầu."
+        print(f"🏁 [Final Answer]: {final_answer}")
+        trace_logs.append({
+            "step": step,
+            "query": user_query,
+            "action_type": "FINAL_ANSWER",
+            "thought": "Dừng an toàn vì vượt giới hạn vòng lặp.",
+            "output": final_answer,
+            "latency_ms": 0.0
+        })
 
     return trace_logs
 
